@@ -44,22 +44,22 @@ var wizardParams = {
   ]
 };
 
-var getRandomNumber = function (min, max) {
-  return Math.floor(Math.random() * (max - min) + min);
+var getRandomArrayElement = function (array) {
+  return array[Math.floor(Math.random() * array.length)];
 };
 
 var createWizardObject = function () {
   return {
-    name: wizardParams.NAMES[getRandomNumber(0, wizardParams.NAMES.length)] + ' '
-    + wizardParams.SURNAMES[getRandomNumber(0, wizardParams.SURNAMES.length)],
-    coatColor: wizardParams.COAT_COLORS[getRandomNumber(0, wizardParams.COAT_COLORS.length)],
-    eyesColor: wizardParams.EYES_COLORS[getRandomNumber(0, wizardParams.EYES_COLORS.length)]
+    name: getRandomArrayElement(wizardParams.NAMES) + ' '
+    + getRandomArrayElement(wizardParams.SURNAMES),
+    coatColor: getRandomArrayElement(wizardParams.COAT_COLORS),
+    eyesColor: getRandomArrayElement(wizardParams.EYES_COLORS)
   };
 };
 
-var createWizardObjectsArray = function (arrayLength) {
+var createWizardObjectsArray = function () {
   var array = [];
-  for (var i = 0; i < arrayLength; i++) {
+  for (var i = 0; i < WIZARD_OBJECTS_ARRAY_LENGTH; i++) {
     array[i] = createWizardObject();
   }
   return array;
@@ -73,15 +73,15 @@ var renderSimilarWizard = function (wizardObject) {
   return similarWizard;
 };
 
-var renderSimilarWizardsList = function (wizardObjectsArray) {
+var renderSimilarWizardsList = function () {
   var fragment = document.createDocumentFragment();
-  for (var i = 0; i < wizardObjectsArray.length; i++) {
-    fragment.appendChild(renderSimilarWizard(wizardObjectsArray[i]));
+  var array = createWizardObjectsArray();
+  for (var i = 0; i < array.length; i++) {
+    fragment.appendChild(renderSimilarWizard(array[i]));
   }
   return fragment;
 };
 
 setupBlock.classList.remove('hidden');
 similarWizardsBlock.classList.remove('hidden');
-similarWizardsListBlock
-  .appendChild(renderSimilarWizardsList(createWizardObjectsArray(WIZARD_OBJECTS_ARRAY_LENGTH)));
+similarWizardsListBlock.appendChild(renderSimilarWizardsList());
