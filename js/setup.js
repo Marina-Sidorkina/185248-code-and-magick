@@ -68,6 +68,11 @@ var wizardParams = {
   ]
 };
 
+var setupBlockCoordinates = {
+  TOP: '80px',
+  LEFT: '50%'
+};
+
 var getRandomArrayElement = function (array) {
   return array[Math.floor(Math.random() * array.length)];
 };
@@ -163,7 +168,13 @@ var onUserNameFieldInput = function (evt) {
   }
 };
 
+var setInitialCoordinates = function () {
+  setupBlock.style.top = setupBlockCoordinates.TOP;
+  setupBlock.style.left = setupBlockCoordinates.LEFT;
+};
+
 var showSetupBlock = function () {
+  setInitialCoordinates();
   setupBlock.classList.remove('hidden');
   similarWizardsBlock.classList.remove('hidden');
   document.addEventListener('keydown', onEscapeKeyDown);
