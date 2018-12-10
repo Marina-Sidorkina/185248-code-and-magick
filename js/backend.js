@@ -7,33 +7,24 @@
     LOAD_ADDRESS: 'https://js.dump.academy/code-and-magick/data'
   };
   var script = document.createElement('script');
+  var callbackName = 'cb_' + Math.round(100000 * Math.random());
+  script.src = urls.LOAD_ADDRESS + '?callback=' + callbackName;
 
-  var addScript = function (cb) {
-    document.body.append(script);
-    script.id = 'script' + cb;
-    script.src = urls.LOAD_ADDRESS + '?callback=' + cb;
-    document.getElementById(script.id).remove();
-    return cb;
-  };
-
-  var getCallbackName = function () {
-    var request = Math.round(100000 * Math.random());
-    return 'cb_' + request;
+  var addScript = function () {
+    document.body.appendChild(script);
+    document.body.removeChild(script);
   };
 
   var load = function (onLoad, onError) {
-    var callback = getCallbackName();
-    window[callback] = function (wizards) {
+    window[callbackName] = function (wizards) {
       if (wizards) {
         onLoad(wizards);
       }
     };
-    script.addEventListener('error', function (error) {
-      if (error) {
-        onError();
-      }
+    script.addEventListener('error', function () {
+      onError();
     });
-    addScript(callback);
+    addScript(callbackName);
   };
 
   var createXhr = function (onLoad, onError) {

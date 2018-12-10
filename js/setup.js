@@ -55,9 +55,9 @@
 
   var renderSimilarWizard = function (wizardObject) {
     var similarWizard = wizardTemplate.cloneNode(true);
-    similarWizard.querySelector('.setup-similar-label').textContent = wizardObject['name'];
-    similarWizard.querySelector('.wizard-coat').style.fill = wizardObject['colorCoat'];
-    similarWizard.querySelector('.wizard-eyes').style.fill = wizardObject['colorEyes'];
+    similarWizard.querySelector('.setup-similar-label').textContent = wizardObject.name;
+    similarWizard.querySelector('.wizard-coat').style.fill = wizardObject.colorCoat;
+    similarWizard.querySelector('.wizard-eyes').style.fill = wizardObject.colorEyes;
     return similarWizard;
   };
 

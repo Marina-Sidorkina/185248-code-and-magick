@@ -1,19 +1,29 @@
 'use strict';
 
 (function () {
+  var VALIDITY_ERRORS = ['tooShort', 'tooLong', 'valueMissing'];
   var form = document.querySelector('.setup-wizard-form');
   var userNameField = document.querySelector('.setup-user-name');
   var successNotification = document.createElement('dialog');
 
+  var getCustomValidityMessage = function (property) {
+    switch (property) {
+      case 'tooShort':
+        return 'Имя волшебника должно состоять минимум из 2-х символов';
+      case 'tooLong':
+        return 'Имя волшебника не может превышать 25-ти символов';
+      case 'valueMissing':
+        return 'Пожалуйста, придумайте имя для волшебника';
+      default:
+        return '';
+    }
+  };
+
   var onUserNameFieldInvalid = function () {
-    if (userNameField.validity.tooShort) {
-      userNameField.setCustomValidity('Имя волшебника должно состоять минимум из 2-х символов');
-    } else if (userNameField.validity.tooLong) {
-      userNameField.setCustomValidity('Имя волшебника не может превышать 25-ти символов');
-    } else if (userNameField.validity.valueMissing) {
-      userNameField.setCustomValidity('Пожалуйста, придумайте имя для волшебника');
-    } else {
-      userNameField.setCustomValidity('');
+    for (var i = 0; i < VALIDITY_ERRORS.length; i++) {
+      if (userNameField.validity[VALIDITY_ERRORS[i]]) {
+        userNameField.setCustomValidity(getCustomValidityMessage(VALIDITY_ERRORS[i]));
+      }
     }
   };
 
