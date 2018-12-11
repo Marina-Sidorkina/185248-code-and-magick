@@ -8,7 +8,6 @@
   var setupOpenButton = document.querySelector('.setup-open');
   var setupCloseButton = document.querySelector('.setup-close');
   var setupOpenIcon = document.querySelector('.setup-open-icon');
-  var userNameField = document.querySelector('.setup-user-name');
   var wizardSetupBlock = document.querySelector('.setup-wizard');
   var wizardCoatSetupBlock = wizardSetupBlock.querySelector('.wizard-coat');
   var wizardCoatSetupInput = setupBlock.querySelector('input[name="coat-color"]');
@@ -18,33 +17,9 @@
   var wizardFireballSetupInput = wizardFireballSetupBlock.querySelector('input[name="fireball-color"]');
   var wizardTemplate = document.querySelector('#similar-wizard-template')
     .content.querySelector('.setup-similar-item');
-
-  var keyCodes = {
-    ENTER: 13,
-    ESCAPE: 27
-  };
+  var popup = document.createElement('dialog');
 
   var wizardParams = {
-    NAMES: [
-      'Иван',
-      'Хуан Себастьян',
-      'Мария',
-      'Кристоф',
-      'Виктор',
-      'Юлия',
-      'Люпита',
-      'Вашингтон'
-    ],
-    SURNAMES: [
-      'да Марья',
-      'Верон',
-      'Мирабелла',
-      'Вальц',
-      'Онопко',
-      'Топольницкая',
-      'Нионго',
-      'Ирвинг'
-    ],
     COAT_COLORS: [
       'rgb(101, 137, 164)',
       'rgb(241, 43, 107)',
@@ -78,54 +53,30 @@
     return array[Math.floor(Math.random() * array.length)];
   };
 
-  var createWizardObject = function () {
-    return {
-      name: getRandomArrayElement(wizardParams.NAMES) + ' '
-      + getRandomArrayElement(wizardParams.SURNAMES),
-      coatColor: getRandomArrayElement(wizardParams.COAT_COLORS),
-      eyesColor: getRandomArrayElement(wizardParams.EYES_COLORS)
-    };
-  };
-
-  var createWizardObjectsArray = function () {
-    var array = [];
-    for (var i = 0; i < WIZARD_OBJECTS_ARRAY_LENGTH; i++) {
-      array[i] = createWizardObject();
-    }
-    return array;
-  };
-
   var renderSimilarWizard = function (wizardObject) {
     var similarWizard = wizardTemplate.cloneNode(true);
     similarWizard.querySelector('.setup-similar-label').textContent = wizardObject.name;
-    similarWizard.querySelector('.wizard-coat').style.fill = wizardObject.coatColor;
-    similarWizard.querySelector('.wizard-eyes').style.fill = wizardObject.eyesColor;
+    similarWizard.querySelector('.wizard-coat').style.fill = wizardObject.colorCoat;
+    similarWizard.querySelector('.wizard-eyes').style.fill = wizardObject.colorEyes;
     return similarWizard;
   };
 
-  var renderSimilarWizardsList = function () {
+  var renderSimilarWizardsList = function (array) {
     var fragment = document.createDocumentFragment();
-    var array = createWizardObjectsArray();
-    for (var i = 0; i < array.length; i++) {
+    for (var i = 0; i < WIZARD_OBJECTS_ARRAY_LENGTH; i++) {
       fragment.appendChild(renderSimilarWizard(array[i]));
     }
     return fragment;
   };
 
   var onSetupOpenIconEnter = function (evt) {
-    if (evt.keyCode === keyCodes.ENTER) {
+    if (evt.keyCode === window.keyCodes.ENTER) {
       showSetupBlock();
     }
   };
 
   var onSetupCloseButtonEnter = function (evt) {
-    if (evt.keyCode === keyCodes.ENTER) {
-      hideSetupBlock();
-    }
-  };
-
-  var onEscapeKeyDown = function (evt) {
-    if (evt.keyCode === keyCodes.ESCAPE && evt.target !== userNameField) {
+    if (evt.keyCode === window.keyCodes.ENTER) {
       hideSetupBlock();
     }
   };
@@ -151,24 +102,6 @@
     wizardFireballSetupInput.value = color;
   };
 
-  var onUserNameFieldInvalid = function () {
-    if (userNameField.validity.tooShort) {
-      userNameField.setCustomValidity('Имя волшебника должно состоять минимум из 2-х символов');
-    } else if (userNameField.validity.tooLong) {
-      userNameField.setCustomValidity('Имя волшебника не может превышать 25-ти символов');
-    } else if (userNameField.validity.valueMissing) {
-      userNameField.setCustomValidity('Пожалуйста, придумайте имя для волшебника');
-    } else {
-      userNameField.setCustomValidity('');
-    }
-  };
-
-  var onUserNameFieldInput = function (evt) {
-    if (evt.target.value.length >= 2) {
-      userNameField.setCustomValidity('');
-    }
-  };
-
   var setInitialCoordinates = function () {
     setupBlock.style.top = setupBlockCoordinates.TOP;
     setupBlock.style.left = setupBlockCoordinates.LEFT;
@@ -179,24 +112,34 @@
     setupBlock.style.left = (setupBlock.offsetLeft - shift.x) + 'px';
   };
 
+  var onWizardsLoadSuccess = function (wizards) {
+    similarWizardsListBlock.innerHTML = '';
+    similarWizardsListBlock.appendChild(renderSimilarWizardsList(wizards));
+  };
+
+  var onLoadError = function () {
+    popup.show();
+  };
+
   var showSetupBlock = function () {
+    window.backend.load(onWizardsLoadSuccess, onLoadError);
     setInitialCoordinates();
     setupBlock.classList.remove('hidden');
     similarWizardsBlock.classList.remove('hidden');
-    document.addEventListener('keydown', onEscapeKeyDown);
+    document.addEventListener('keydown', window.validation.onEscapeKeyDown);
     setupCloseButton.addEventListener('click', hideSetupBlock);
     setupCloseButton.addEventListener('keydown', onSetupCloseButtonEnter);
     wizardCoatSetupBlock.addEventListener('click', onWizardCoatSetupBlockClick);
     wizardEyesSetupBlock.addEventListener('click', onWizardEyesSetupBlockClick);
     wizardFireballSetupBlock.addEventListener('click', onWizardFireballSetupBlockClick);
-    userNameField.addEventListener('invalid', onUserNameFieldInvalid);
-    userNameField.addEventListener('input', onUserNameFieldInput);
     setupOpenButton.removeEventListener('click', showSetupBlock);
     setupOpenIcon.removeEventListener('keydown', onSetupOpenIconEnter);
+    window.validation.addUserNameFieldListeners();
   };
 
   var hideSetupBlock = function () {
     setupBlock.classList.add('hidden');
+    popup.close();
     setupOpenButton.addEventListener('click', showSetupBlock);
     setupOpenIcon.addEventListener('keydown', onSetupOpenIconEnter);
     setupCloseButton.removeEventListener('click', hideSetupBlock);
@@ -204,14 +147,19 @@
     wizardCoatSetupBlock.removeEventListener('click', onWizardCoatSetupBlockClick);
     wizardEyesSetupBlock.removeEventListener('click', onWizardEyesSetupBlockClick);
     wizardFireballSetupBlock.removeEventListener('click', onWizardFireballSetupBlockClick);
-    document.removeEventListener('keydown', onEscapeKeyDown);
-    userNameField.removeEventListener('invalid', onUserNameFieldInvalid);
-    userNameField.removeEventListener('input', onUserNameFieldInput);
+    document.removeEventListener('keydown', window.validation.onEscapeKeyDown);
+    window.validation.removeUserNameFieldListeners();
   };
 
+  popup.textContent = 'Oooops! Кажется, что-то пошло не так...';
+  popup.style.top = '0px';
+  setupBlock.append(popup);
   setupOpenIcon.addEventListener('keydown', onSetupOpenIconEnter);
   setupOpenButton.addEventListener('click', showSetupBlock);
-  similarWizardsListBlock.appendChild(renderSimilarWizardsList());
 
-  window.setSetupBlockCoordinates = setSetupBlockCoordinates;
+  window.setup = {
+    hideBlock: hideSetupBlock,
+    setBlockCoordinates: setSetupBlockCoordinates,
+    onLoadError: onLoadError
+  };
 })();

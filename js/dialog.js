@@ -1,7 +1,7 @@
 'use strict';
 
 (function () {
-  var setupHandler = document.querySelector('.setup-user-pic');
+  var setupHandler = document.querySelector('.setup-user-pic').parentElement;
 
   var checkChangeValue = function (change) {
     if (change) {
@@ -27,7 +27,6 @@
     };
   };
 
-  setupHandler.style.zIndex = 1;
   setupHandler.addEventListener('mousedown', function (evt) {
     evt.preventDefault();
     var startCoordinates = getSetupHandlerCoordinates(evt);
@@ -38,7 +37,7 @@
       change = true;
       var shift = getShiftCoordinates(startCoordinates, moveEvt);
       startCoordinates = getSetupHandlerCoordinates(moveEvt);
-      window.setSetupBlockCoordinates(shift);
+      window.setup.setBlockCoordinates(shift);
     };
 
     var onMouseUp = function (upEvt) {
